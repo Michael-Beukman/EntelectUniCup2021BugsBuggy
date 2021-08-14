@@ -24,30 +24,18 @@ def main(prob: ProperProblem):
         current_p += p
         quotas_to_take.append(t)
         # if len(quotas_to_take) >= 2: break
-    print("Quotas", quotas_to_take)
     quotas_to_take = set(quotas_to_take)
     w1 = 10; w2 = 1000; w3 = 1; w4 = 100000000
     def score(RC: ResourceCluster, current_pos):
         if RC.type not in quotas_to_take: return 0
-        # RC.score = RC.resource_count * w1 + RC.type * w4
-        # RC.score = RC.resource_count * w1 + RC.type * w4 - w2 * (np.linalg.norm(RC.pos)) + w3 * score_table[RC.type]['pm']
-        # return RC.score
         return RC.resource_count * w1 + RC.type * w4 - w2 * max(np.linalg.norm(current_pos - RC.pos), 1) + w3 * score_table[RC.type]['pm']
-        # return w4 * RC.type + RC.resource_count * w1 - w2 * max(np.linalg.norm(current_pos - RC.pos), 1) + w3 * score_table[RC.type]['pm']
-
-    # all_clusters: List[ResourceCluster] = sorted([prob.all_clusters[k] for k in prob.all_clusters if prob.all_clusters[k].type in quotas_to_take], key=lambda s: np.linalg.norm(s.pos))
-    # all_clusters: List[ResourceCluster] = sorted([prob.all_clusters[k] for k in prob.all_clusters if prob.all_clusters[k].type in quotas_to_take], key=lambda s: -s.resource_count )#np.linalg.norm(s.pos))
     all_clusters: List[ResourceCluster] = sorted([prob.all_clusters[k] for k in prob.all_clusters if prob.all_clusters[k].type in quotas_to_take], key=lambda s: -score(s, np.array([0, 0, 0])) )#np.linalg.norm(s.pos))
-
-    print("Num batches = ", num_batches)
-    
     
 
     total_weight = 0
 
 
     for index in range(num_batches):
-        print(f"BATCH {index}")
         positions = [np.array([0, 0, 0]) for _ in range(batch_size)]
         capacities = [0 for _ in range(batch_size)]
         do_loop = True
@@ -72,10 +60,6 @@ def main(prob: ProperProblem):
                     continue
                 do_loop = True
                 myindex, RC = max(enumerate(all_clusters[:10]), key=lambda K: score(K[1], pos))
-                # myindex, RC = max(enumerate(all_clusters[:50]), key=lambda K: K[1].score)
-                
-                # myindex, RC = max(enumerate(all_clusters), key=lambda K: K[1].resource_count)
-                # myindex, RC = max(enumerate(all_clusters), key=lambda K: score_table[K[1].type]['pm'] * K[1].resource_count)
 
                 all_clusters.pop(myindex)
                 capacities[i] += RC.resource_count
@@ -83,13 +67,7 @@ def main(prob: ProperProblem):
                 positions[i] = RC.pos
                 
                 amounts[RC.type] += RC.resource_count
-                # if amounts[RC.type] / prob.thresh >= prob.quotas[RC.type] / 100:
-                    # quotas_to_take.remove(RC.type)
-                    # all_clusters = [r for r in all_clusters if r.type in quotas_to_take]
-                # print(I, len(ans))
                 ans[I].append(RC.id)
-                # print("INDEX", index, ans[I])
-                # print('cap', capacities[i])
                 
     print(f"TOTAL WEIGHT. {prob.filename} = {total_weight} / {prob.thresh}")
     sol = ProperSolution(prob, ans)

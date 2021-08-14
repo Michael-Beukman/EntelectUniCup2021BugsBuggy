@@ -22,7 +22,6 @@ def main(prob: ProperProblem):
         p = prob.quotas[t]
         current_p += p
         quotas_to_take.append(t)
-    print("Quotas", quotas_to_take)
     quotas_to_take = set(quotas_to_take)
     w1 = 10; w2 = 1; w3 = 1; w4 = 100000000
     def score(RC: ResourceCluster, current_pos):
@@ -31,7 +30,6 @@ def main(prob: ProperProblem):
 
     all_clusters: List[ResourceCluster] = sorted([prob.all_clusters[k] for k in prob.all_clusters if prob.all_clusters[k].type in quotas_to_take], key=lambda s: -score(s, np.array([0, 0, 0])) )#np.linalg.norm(s.pos))
 
-    print("Num batches = ", num_batches)
 
     total_weight = 0
 
